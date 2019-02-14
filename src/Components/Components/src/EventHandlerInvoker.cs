@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -11,7 +11,9 @@ namespace Microsoft.AspNetCore.Components
     /// </summary>
     public readonly struct EventHandlerInvoker
     {
-        private readonly MulticastDelegate _delegate;
+        public static readonly EventHandlerInvoker Empty = new EventHandlerInvoker((Action)(() => { }));
+
+        public static readonly EventHandlerInvokerFactory Factory = new EventHandlerInvokerFactory();
 
         /// <summary>
         /// Creates the new <see cref="EventHandlerInvoker"/>.
@@ -19,8 +21,14 @@ namespace Microsoft.AspNetCore.Components
         /// <param name="delegate">The delegate to bind.</param>
         public EventHandlerInvoker(MulticastDelegate @delegate)
         {
-            _delegate = @delegate;
+            Delegate = @delegate;
         }
+
+        /// <summary>
+        /// Gets the delegate assocated with this <see cref="EventHandlerInvoker"/>.
+        /// </summary>
+        public MulticastDelegate Delegate { get; }
+
         /// <summary>
         /// Invokes the delegate associated with this binding.
         /// </summary>
@@ -28,7 +36,7 @@ namespace Microsoft.AspNetCore.Components
         /// <returns></returns>
         public Task Invoke(UIEventArgs e)
         {
-            switch (_delegate)
+            switch (Delegate)
             {
                 case Action action:
                     action.Invoke();

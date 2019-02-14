@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.Components
     /// Optional base class for components. Alternatively, components may
     /// implement <see cref="IComponent"/> directly.
     /// </summary>
-    public abstract class ComponentBase : IComponent, IHandleEvent, IHandleAfterRender
+    public abstract class ComponentBase : IComponent, IHandleAfterEvent, IHandleAfterRender
     {
         /// <summary>
         /// Specifies the name of the <see cref="RenderTree"/>-building method.
@@ -67,7 +67,7 @@ namespace Microsoft.AspNetCore.Components
         /// <summary>
         /// Method invoked when the component is ready to start, having received its
         /// initial parameters from its parent in the render tree.
-        /// 
+        ///
         /// Override this method if you will perform an asynchronous operation and
         /// want the component to refresh when that operation is completed.
         /// </summary>
@@ -157,6 +157,30 @@ namespace Microsoft.AspNetCore.Components
         protected Task InvokeAsync(Func<Task> workItem)
             => _renderHandle.InvokeAsync(workItem);
 
+        /// <summary>
+        /// Dispatches a state change notification to the provided component.
+        /// </summary>
+        /// <param name="component">The component instance.</param>
+        /// <param name="invoker">The <see cref="EventHandlerInvoker"/></param>
+        /// <param name="eventArgs">The event args.</param>
+        /// <returns>
+        /// A <see cref="Task" /> that asynchronously completes once event processing has completed.
+        /// </returns>
+        public static Task DispatchEventAsync(object component, EventHandlerInvoker invoker, UIEventArgs eventArgs)
+        {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            if (component is IHandleAfterEvent handler)
+            {
+                return handler.HandleEventAsync(invoker, eventArgs);
+            }
+
+            return invoker.Invoke(eventArgs);
+        }
+
         void IComponent.Configure(RenderHandle renderHandle)
         {
             // This implicitly means a ComponentBase can only be associated with a single
@@ -210,8 +234,8 @@ namespace Microsoft.AspNetCore.Components
                 catch when (task.IsCanceled)
                 {
                     // Ignore exceptions from task cancelletions.
-                    // Awaiting a canceled task may produce either an OperationCanceledException (if produced as a consequence of 
-                    // CancellationToken.ThrowIfCancellationRequested()) or a TaskCanceledException (produced as a consequence of awaiting Task.FromCanceled). 
+                    // Awaiting a canceled task may produce either an OperationCanceledException (if produced as a consequence of
+                    // CancellationToken.ThrowIfCancellationRequested()) or a TaskCanceledException (produced as a consequence of awaiting Task.FromCanceled).
                     // It's much easier to check the state of the Task (i.e. Task.IsCanceled) rather than catch two distinct exceptions.
                 }
 
@@ -255,9 +279,9 @@ namespace Microsoft.AspNetCore.Components
             StateHasChanged();
         }
 
-        Task IHandleEvent.HandleEventAsync(EventHandlerInvoker binding, UIEventArgs args)
+        Task IHandleAfterEvent.HandleEventAsync(EventHandlerInvoker invoker, UIEventArgs eventArgs)
         {
-            var task = binding.Invoke(args);
+            var task = invoker.Invoke(eventArgs);
             var shouldAwaitTask = task.Status != TaskStatus.RanToCompletion &&
                 task.Status != TaskStatus.Canceled;
 

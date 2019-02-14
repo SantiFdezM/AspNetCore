@@ -8,6 +8,8 @@ namespace Microsoft.AspNetCore.Components
     /// </summary>
     public class UIEventArgs
     {
+        public static readonly UIEventArgs Empty = new UIEventArgs();
+
         /// <summary>
         /// Gets or sets the type of the event.
         /// </summary>

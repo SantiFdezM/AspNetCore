@@ -200,39 +200,44 @@ namespace Microsoft.AspNetCore.Components.Rendering
         protected abstract Task UpdateDisplayAsync(in RenderBatch renderBatch);
 
         /// <summary>
-        /// Notifies the specified component that an event has occurred.
+        /// Notifies the renderer that an event has occurred.
         /// </summary>
-        /// <param name="componentId">The unique identifier for the component within the scope of this <see cref="Renderer"/>.</param>
         /// <param name="eventHandlerId">The <see cref="RenderTreeFrame.AttributeEventHandlerId"/> value from the original event attribute.</param>
         /// <param name="eventArgs">Arguments to be passed to the event handler.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous execution operation.</returns>
-        public Task DispatchEventAsync(int componentId, int eventHandlerId, UIEventArgs eventArgs)
+        /// <returns>
+        /// A <see cref="Task"/> which will complete once all asynchronous processing related to the event
+        /// has completed.
+        /// </returns>
+        public Task DispatchEventAsync(int eventHandlerId, UIEventArgs eventArgs)
         {
             EnsureSynchronizationContext();
 
-            if (_eventBindings.TryGetValue(eventHandlerId, out var binding))
-            {
-                // The event handler might request multiple renders in sequence. Capture them
-                // all in a single batch.
-                var componentState = GetRequiredComponentState(componentId);
-                Task task = null;
-                try
-                {
-                    _isBatchInProgress = true;
-                    task = componentState.DispatchEventAsync(binding, eventArgs);
-                }
-                finally
-                {
-                    _isBatchInProgress = false;
-                    ProcessRenderQueue();
-                }
-
-                return GetErrorHandledTask(task);
-            }
-            else
+            if (!_eventBindings.TryGetValue(eventHandlerId, out var binding))
             {
                 throw new ArgumentException($"There is no event handler with ID {eventHandlerId}");
             }
+
+            Task task = null;
+            try
+            {
+                // The event handler might request multiple renders in sequence. Capture them
+                // all in a single batch.
+                _isBatchInProgress = true;
+
+                task = ComponentBase.DispatchEventAsync(binding.Delegate.Target, binding, eventArgs);
+            }
+            finally
+            {
+                _isBatchInProgress = false;
+
+                // Since the task has yielded - process any queued rendering work before we return control
+                // to the caller.
+                ProcessRenderQueue();
+            }
+
+            // Task completed synchronously or is still running. We already processed all of the rendering
+            // work that was queued so let our error handler deal with it.
+            return GetErrorHandledTask(task);
         }
 
         /// <summary>

@@ -74,7 +74,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<string> setter, string existingValue)
         {
-            return _ => setter((string)((UIChangeEventArgs)_).Value);
+            return eventArgs =>
+            {
+                setter((string)((UIChangeEventArgs)eventArgs).Value);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -82,7 +86,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<bool> setter, bool existingValue)
         {
-            return _ => setter((bool)((UIChangeEventArgs)_).Value);
+            return eventArgs =>
+            {
+                setter((bool)((UIChangeEventArgs)eventArgs).Value);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -90,7 +98,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<bool?> setter, bool? existingValue)
         {
-            return _ => setter((bool?)((UIChangeEventArgs)_).Value);
+            return eventArgs =>
+            {
+                setter((bool?)((UIChangeEventArgs)eventArgs).Value);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -98,7 +110,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<int> setter, int existingValue)
         {
-            return _ => setter(int.Parse((string)((UIChangeEventArgs)_).Value));
+            return eventArgs =>
+            {
+                setter(int.Parse((string)((UIChangeEventArgs)eventArgs).Value));
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -106,9 +122,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<int?> setter, int? existingValue)
         {
-            return _ => setter(int.TryParse((string)((UIChangeEventArgs)_).Value, out var tmpvalue)
-                ? tmpvalue
-                : (int?)null);
+            return eventArgs =>
+            {
+                setter(int.TryParse((string)((UIChangeEventArgs)eventArgs).Value, out var value) ? value : (int?)null);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -116,7 +134,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<long> setter, long existingValue)
         {
-            return _ => setter(long.Parse((string)((UIChangeEventArgs)_).Value));
+            return eventArgs =>
+            {
+                setter(long.Parse((string)((UIChangeEventArgs)eventArgs).Value));
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -124,9 +146,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<long?> setter, long? existingValue)
         {
-            return _ => setter(long.TryParse((string)((UIChangeEventArgs)_).Value, out var tmpvalue)
-                ? tmpvalue
-                : (long?)null);
+            return eventArgs =>
+            {
+                setter(long.TryParse((string)((UIChangeEventArgs)eventArgs).Value, out var value) ? value : (long?)null);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -134,7 +158,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<float> setter, float existingValue)
         {
-            return _ => setter(float.Parse((string)((UIChangeEventArgs)_).Value));
+            return eventArgs =>
+            {
+                setter(float.Parse((string)((UIChangeEventArgs)eventArgs).Value));
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -142,9 +170,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<float?> setter, float? existingValue)
         {
-            return _ => setter(float.TryParse((string)((UIChangeEventArgs)_).Value, out var tmpvalue)
-                ? tmpvalue
-                : (float?)null);
+            return eventArgs =>
+            {
+                setter(float.TryParse((string)((UIChangeEventArgs)eventArgs).Value, out var value) ? value : (float?)null);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -152,7 +182,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<double> setter, double existingValue)
         {
-            return _ => setter(double.Parse((string)((UIChangeEventArgs)_).Value));
+            return eventArgs =>
+            {
+                setter(double.Parse((string)((UIChangeEventArgs)eventArgs).Value));
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -160,9 +194,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<double?> setter, double? existingValue)
         {
-            return _ => setter(double.TryParse((string)((UIChangeEventArgs)_).Value, out var tmpvalue)
-                ? tmpvalue
-                : (double?)null);
+            return eventArgs =>
+            {
+                setter(double.TryParse((string)((UIChangeEventArgs)eventArgs).Value, out var value) ? value : (double?)null);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -170,7 +206,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<decimal> setter, decimal existingValue)
         {
-            return _ => setter(decimal.Parse((string)((UIChangeEventArgs)_).Value));
+            return eventArgs =>
+            {
+                setter(decimal.Parse((string)((UIChangeEventArgs)eventArgs).Value));
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -178,9 +218,11 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<decimal?> setter, decimal? existingValue)
         {
-            return _ => setter(decimal.TryParse((string)((UIChangeEventArgs)_).Value, out var tmpvalue)
-                ? tmpvalue
-                : (decimal?)null);
+            return eventArgs =>
+            {
+                setter(decimal.TryParse((string)((UIChangeEventArgs)eventArgs).Value, out var tmpvalue) ? tmpvalue : (decimal?)null);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            };
         }
 
         /// <summary>
@@ -188,7 +230,10 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<DateTime> setter, DateTime existingValue)
         {
-            return _ => SetDateTimeValue(setter, ((UIChangeEventArgs)_).Value, null);
+            return eventArgs =>
+            {
+                SetDateTimeValue(setter, ((UIChangeEventArgs)eventArgs).Value, null);
+            };
         }
 
         /// <summary>
@@ -196,7 +241,10 @@ namespace Microsoft.AspNetCore.Components
         /// </summary>
         public static Action<UIEventArgs> SetValueHandler(Action<DateTime> setter, DateTime existingValue, string format)
         {
-            return _ => SetDateTimeValue(setter, ((UIChangeEventArgs)_).Value, format);
+            return eventArgs =>
+            {
+                SetDateTimeValue(setter, ((UIChangeEventArgs)eventArgs).Value, format);
+            };
         }
 
         /// <summary>
@@ -209,11 +257,12 @@ namespace Microsoft.AspNetCore.Components
                 throw new ArgumentException($"'bind' does not accept values of type {typeof(T).FullName}. To read and write this value type, wrap it in a property of type string with suitable getters and setters.");
             }
 
-            return _ =>
+            return eventArgs =>
             {
-                var value = (string)((UIChangeEventArgs)_).Value;
+                var value = (string)((UIChangeEventArgs)eventArgs).Value;
                 var parsed = (T)Enum.Parse(typeof(T), value);
                 setter(parsed);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -224,6 +273,7 @@ namespace Microsoft.AspNetCore.Components
                 : format != null && DateTime.TryParseExact(stringValue, format, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsedExact) ? parsedExact
                 : DateTime.Parse(stringValue);
             setter(parsedValue);
+            _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
         }
     }
 }
