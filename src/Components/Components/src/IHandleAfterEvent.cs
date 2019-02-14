@@ -13,11 +13,11 @@ namespace Microsoft.AspNetCore.Components
         /// <summary>
         /// Notifies the a state change has been triggered.
         /// </summary>
-        /// <param name="invoker">The <see cref="EventHandlerInvoker"/> associated with this event.</param>
-        /// <param name="eventArgs">The <see cref="UIEventArgs"/> associated with this event.</param>
+        /// <param name="callback">The <see cref="EventCallback"/> associated with this event.</param>
+        /// <param name="arg">The argument associated with this event.</param>
         /// <returns>
         /// A <see cref="Task"/> that completes once the component has processed the state change.
         /// </returns>
-        Task HandleEventAsync(EventHandlerInvoker invoker, UIEventArgs eventArgs);
+        Task HandleEventAsync(EventCallback callback, object arg);
     }
 }

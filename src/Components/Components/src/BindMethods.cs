@@ -77,7 +77,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter((string)((UIChangeEventArgs)eventArgs).Value);
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -89,7 +89,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter((bool)((UIChangeEventArgs)eventArgs).Value);
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -101,7 +101,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter((bool?)((UIChangeEventArgs)eventArgs).Value);
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -113,7 +113,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter(int.Parse((string)((UIChangeEventArgs)eventArgs).Value));
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -125,7 +125,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter(int.TryParse((string)((UIChangeEventArgs)eventArgs).Value, out var value) ? value : (int?)null);
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -137,7 +137,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter(long.Parse((string)((UIChangeEventArgs)eventArgs).Value));
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -149,7 +149,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter(long.TryParse((string)((UIChangeEventArgs)eventArgs).Value, out var value) ? value : (long?)null);
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -161,7 +161,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter(float.Parse((string)((UIChangeEventArgs)eventArgs).Value));
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -173,7 +173,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter(float.TryParse((string)((UIChangeEventArgs)eventArgs).Value, out var value) ? value : (float?)null);
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -185,7 +185,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter(double.Parse((string)((UIChangeEventArgs)eventArgs).Value));
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -197,7 +197,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter(double.TryParse((string)((UIChangeEventArgs)eventArgs).Value, out var value) ? value : (double?)null);
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -209,7 +209,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter(decimal.Parse((string)((UIChangeEventArgs)eventArgs).Value));
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -221,7 +221,7 @@ namespace Microsoft.AspNetCore.Components
             return eventArgs =>
             {
                 setter(decimal.TryParse((string)((UIChangeEventArgs)eventArgs).Value, out var tmpvalue) ? tmpvalue : (decimal?)null);
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -262,7 +262,7 @@ namespace Microsoft.AspNetCore.Components
                 var value = (string)((UIChangeEventArgs)eventArgs).Value;
                 var parsed = (T)Enum.Parse(typeof(T), value);
                 setter(parsed);
-                _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+                _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
             };
         }
 
@@ -273,7 +273,7 @@ namespace Microsoft.AspNetCore.Components
                 : format != null && DateTime.TryParseExact(stringValue, format, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsedExact) ? parsedExact
                 : DateTime.Parse(stringValue);
             setter(parsedValue);
-            _ = ComponentBase.DispatchEventAsync(setter.Target, EventHandlerInvoker.Empty, UIEventArgs.Empty);
+            _ = ComponentBase.DispatchEventAsync(setter.Target, EventCallback.Empty, UIEventArgs.Empty);
         }
     }
 }

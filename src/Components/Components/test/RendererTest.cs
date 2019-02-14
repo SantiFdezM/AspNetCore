@@ -857,7 +857,7 @@ namespace Microsoft.AspNetCore.Components.Test
         // but uses our event handling infrastructure to achieve the same effect. The call to CreateDelegate
         // is not necessary for correctness in this case - it should just no op.
         [Fact]
-        public async Task EventDispatching_EventHandlerInvoker_MethodToDelegateConversion()
+        public async Task EventDispatching_EventDispatcher_MethodToDelegateConversion()
         {
             // Arrange
             var outerStateChangeCount = 0;
@@ -867,7 +867,7 @@ namespace Microsoft.AspNetCore.Components.Test
             parentComponent.RenderFragment = (builder) =>
             {
                 builder.OpenComponent<EventComponent>(0);
-                builder.AddAttribute(1, nameof(EventComponent.OnClickAction), EventHandlerInvoker.Factory.CreateDelegate(parentComponent, (Action)parentComponent.SomeMethod));
+                builder.AddAttribute(1, nameof(EventComponent.OnClickEventDispatcher), EventDispatcher.Factory.CreateDispatcher(parentComponent, (Action)parentComponent.SomeMethod));
                 builder.CloseComponent();
             };
             parentComponent.OnEvent = () =>
@@ -880,7 +880,7 @@ namespace Microsoft.AspNetCore.Components.Test
 
             var eventHandlerId = renderer.Batches[0]
                 .ReferenceFrames
-                .First(frame => frame.AttributeName == "onclickaction")
+                .First(frame => frame.AttributeName == "onclick")
                 .AttributeEventHandlerId;
 
             // Act
@@ -895,7 +895,7 @@ namespace Microsoft.AspNetCore.Components.Test
         // This is a similar case to EventDispatching_DelegateParameter_NoTargetLambda but it uses
         // our event-handling infrastructure to avoid the need for a manual StateHasChanged()
         [Fact]
-        public async Task EventDispatching_EventHandlerInvoker_NoTargetLambda()
+        public async Task EventDispatching_EventDispatcher_NoTargetLambda()
         {
             // Arrange
             var outerStateChangeCount = 0;
@@ -905,7 +905,7 @@ namespace Microsoft.AspNetCore.Components.Test
             parentComponent.RenderFragment = (builder) =>
             {
                 builder.OpenComponent<EventComponent>(0);
-                builder.AddAttribute(1, nameof(EventComponent.OnClickAction), EventHandlerInvoker.Factory.CreateDelegate(parentComponent, (Action)(() =>
+                builder.AddAttribute(1, nameof(EventComponent.OnClickEventDispatcher), EventDispatcher.Factory.CreateDispatcher(parentComponent, (Action)(() =>
                 {
                     parentComponent.SomeMethod();
                 })));
@@ -921,7 +921,84 @@ namespace Microsoft.AspNetCore.Components.Test
 
             var eventHandlerId = renderer.Batches[0]
                 .ReferenceFrames
-                .First(frame => frame.AttributeName == "onclickaction")
+                .First(frame => frame.AttributeName == "onclick")
+                .AttributeEventHandlerId;
+
+            // Act
+            var eventArgs = new UIMouseEventArgs();
+            await renderer.DispatchEventAsync(eventHandlerId, eventArgs);
+
+            // Assert
+            Assert.Equal(1, parentComponent.SomeMethodCallCount);
+            Assert.Equal(1, outerStateChangeCount);
+        }
+
+        [Fact]
+        public async Task EventDispatching_EventDispatcherOfT_MethodToDelegateConversion()
+        {
+            // Arrange
+            var outerStateChangeCount = 0;
+
+            var renderer = new TestRenderer();
+            var parentComponent = new OuterEventComponent();
+            parentComponent.RenderFragment = (builder) =>
+            {
+                builder.OpenComponent<EventComponent>(0);
+                builder.AddAttribute(1, nameof(EventComponent.OnClickEventDispatcherOfT), EventDispatcher.Factory.CreateDispatcher<UIMouseEventArgs>(parentComponent, (Action)parentComponent.SomeMethod));
+                builder.CloseComponent();
+            };
+            parentComponent.OnEvent = () =>
+            {
+                outerStateChangeCount++;
+            };
+
+            var parentComponentId = renderer.AssignRootComponentId(parentComponent);
+            await parentComponent.TriggerRenderAsync();
+
+            var eventHandlerId = renderer.Batches[0]
+                .ReferenceFrames
+                .First(frame => frame.AttributeName == "onclick")
+                .AttributeEventHandlerId;
+
+            // Act
+            var eventArgs = new UIMouseEventArgs();
+            await renderer.DispatchEventAsync(eventHandlerId, eventArgs);
+
+            // Assert
+            Assert.Equal(1, parentComponent.SomeMethodCallCount);
+            Assert.Equal(1, outerStateChangeCount);
+        }
+
+        // This is a similar case to EventDispatching_DelegateParameter_NoTargetLambda but it uses
+        // our event-handling infrastructure to avoid the need for a manual StateHasChanged()
+        [Fact]
+        public async Task EventDispatching_EventDispatcherOfT_NoTargetLambda()
+        {
+            // Arrange
+            var outerStateChangeCount = 0;
+
+            var renderer = new TestRenderer();
+            var parentComponent = new OuterEventComponent();
+            parentComponent.RenderFragment = (builder) =>
+            {
+                builder.OpenComponent<EventComponent>(0);
+                builder.AddAttribute(1, nameof(EventComponent.OnClickEventDispatcherOfT), EventDispatcher.Factory.CreateDispatcher<UIMouseEventArgs>(parentComponent, (Action)(() =>
+                {
+                    parentComponent.SomeMethod();
+                })));
+                builder.CloseComponent();
+            };
+            parentComponent.OnEvent = () =>
+            {
+                outerStateChangeCount++;
+            };
+
+            var parentComponentId = renderer.AssignRootComponentId(parentComponent);
+            await parentComponent.TriggerRenderAsync();
+
+            var eventHandlerId = renderer.Batches[0]
+                .ReferenceFrames
+                .First(frame => frame.AttributeName == "onclick")
                 .AttributeEventHandlerId;
 
             // Act
@@ -2582,6 +2659,12 @@ namespace Microsoft.AspNetCore.Components.Test
             [Parameter]
             internal Func<Task> OnClickAsyncAction { get; set; }
 
+            [Parameter]
+            internal EventDispatcher OnClickEventDispatcher { get; set; }
+
+            [Parameter]
+            internal EventDispatcher<UIMouseEventArgs> OnClickEventDispatcherOfT { get; set; }
+
             public bool SkipElement { get; set; }
             private int renderCount = 0;
 
@@ -2592,6 +2675,7 @@ namespace Microsoft.AspNetCore.Components.Test
                 {
                     builder.OpenElement(1, "parent");
                     builder.OpenElement(2, "some element");
+
                     if (OnTest != null)
                     {
                         builder.AddAttribute(3, "ontest", OnTest);
@@ -2600,6 +2684,7 @@ namespace Microsoft.AspNetCore.Components.Test
                     {
                         builder.AddAttribute(3, "ontest", OnTestAsync);
                     }
+
                     if (OnClick != null)
                     {
                         builder.AddAttribute(4, "onclick", OnClick);
@@ -2608,6 +2693,15 @@ namespace Microsoft.AspNetCore.Components.Test
                     {
                         builder.AddAttribute(4, "onclick", OnClickAsync);
                     }
+                    else if (OnClickEventDispatcher.HasDelegate)
+                    {
+                        builder.AddAttribute(4, "onclick", OnClickEventDispatcher);
+                    }
+                    else if (OnClickEventDispatcherOfT.HasDelegate)
+                    {
+                        builder.AddAttribute(4, "onclick", OnClickEventDispatcherOfT);
+                    }
+
                     if (OnClickAction != null)
                     {
                         builder.AddAttribute(5, "onclickaction", OnClickAction);
@@ -2623,10 +2717,10 @@ namespace Microsoft.AspNetCore.Components.Test
                 builder.AddContent(6, $"Render count: {++renderCount}");
             }
 
-            public Task HandleEventAsync(EventHandlerInvoker invoker, UIEventArgs eventArgs)
+            public Task HandleEventAsync(EventCallback callback, object arg)
             {
                 // Notice, we don't re-render.
-                return invoker.Invoke(eventArgs);
+                return callback.InvokeAsync(arg);
             }
         }
 
@@ -2694,9 +2788,9 @@ namespace Microsoft.AspNetCore.Components.Test
                 return Task.CompletedTask;
             }
 
-            public Task HandleEventAsync(EventHandlerInvoker invoker, UIEventArgs eventArgs)
+            public Task HandleEventAsync(EventCallback callback, object arg)
             {
-                var task = invoker.Invoke(eventArgs);
+                var task = callback.InvokeAsync(arg);
                 Render();
                 return task;
             }
@@ -2740,9 +2834,9 @@ namespace Microsoft.AspNetCore.Components.Test
             public bool CheckboxEnabled;
             public string SomeStringProperty;
 
-            public Task HandleEventAsync(EventHandlerInvoker invoker, UIEventArgs eventArgs)
+            public Task HandleEventAsync(EventCallback callback, object arg)
             {
-                var task = invoker.Invoke(eventArgs);
+                var task = callback.InvokeAsync(arg);
                 TriggerRender();
                 return task;
             }
@@ -2873,9 +2967,9 @@ namespace Microsoft.AspNetCore.Components.Test
                 _renderHandle = renderHandle;
             }
 
-            public Task HandleEventAsync(EventHandlerInvoker invoker, UIEventArgs eventArgs)
+            public Task HandleEventAsync(EventCallback callback, object arg)
             {
-                var task = invoker.Invoke(eventArgs);
+                var task = callback.InvokeAsync(arg);
                 OnEvent.Invoke();
                 return task;
             }

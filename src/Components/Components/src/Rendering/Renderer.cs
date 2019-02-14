@@ -19,7 +19,7 @@ namespace Microsoft.AspNetCore.Components.Rendering
         private readonly ComponentFactory _componentFactory;
         private readonly Dictionary<int, ComponentState> _componentStateById = new Dictionary<int, ComponentState>();
         private readonly RenderBatchBuilder _batchBuilder = new RenderBatchBuilder();
-        private readonly Dictionary<int, EventHandlerInvoker> _eventBindings = new Dictionary<int, EventHandlerInvoker>();
+        private readonly Dictionary<int, EventDispatcher> _eventBindings = new Dictionary<int, EventDispatcher>();
         private IDispatcher _dispatcher;
 
         private int _nextComponentId = 0; // TODO: change to 'long' when Mono .NET->JS interop supports it
@@ -212,7 +212,7 @@ namespace Microsoft.AspNetCore.Components.Rendering
         {
             EnsureSynchronizationContext();
 
-            if (!_eventBindings.TryGetValue(eventHandlerId, out var binding))
+            if (!_eventBindings.TryGetValue(eventHandlerId, out var eventDispatcher))
             {
                 throw new ArgumentException($"There is no event handler with ID {eventHandlerId}");
             }
@@ -224,7 +224,7 @@ namespace Microsoft.AspNetCore.Components.Rendering
                 // all in a single batch.
                 _isBatchInProgress = true;
 
-                task = ComponentBase.DispatchEventAsync(binding.Delegate.Target, binding, eventArgs);
+                task = eventDispatcher.InvokeAsync(eventArgs);
             }
             finally
             {
@@ -343,9 +343,23 @@ namespace Microsoft.AspNetCore.Components.Rendering
         {
             var id = ++_lastEventHandlerId;
 
-            if (frame.AttributeValue is MulticastDelegate @delegate)
+            if (frame.AttributeValue is EventDispatcher eventDispatcher)
             {
-                _eventBindings.Add(id, new EventHandlerInvoker(@delegate));
+                // We hit this case when a EventDispatcher object is produced that needs an explicit receiver.
+                // Common cases for this are "chained bind" or "chained event handler" when a component
+                // accepts a delegate as a parameter and then hooks it up to a DOM event.
+                //
+                // When that happens we intentionally box the Command because we need to hold on to
+                // the receiver.
+                _eventBindings.Add(id, eventDispatcher);
+            }
+            else if (frame.AttributeValue is MulticastDelegate @delegate)
+            {
+                // This is the common case for a delegate, where the receiver of the event
+                // is the same as delegate.Target. In this case since the receiver is implicit we can
+                // avoid boxing the EventDispatcher object and just re-hydrate it on the other side of the
+                // render tree.
+                _eventBindings.Add(id, new EventDispatcher(@delegate.Target as IHandleAfterEvent, @delegate));
             }
 
             frame = frame.WithAttributeEventHandlerId(id);

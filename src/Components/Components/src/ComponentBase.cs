@@ -161,12 +161,12 @@ namespace Microsoft.AspNetCore.Components
         /// Dispatches a state change notification to the provided component.
         /// </summary>
         /// <param name="component">The component instance.</param>
-        /// <param name="invoker">The <see cref="EventHandlerInvoker"/></param>
-        /// <param name="eventArgs">The event args.</param>
+        /// <param name="callback">The <see cref="EventCallback"/></param>
+        /// <param name="arg">The event argument.</param>
         /// <returns>
         /// A <see cref="Task" /> that asynchronously completes once event processing has completed.
         /// </returns>
-        public static Task DispatchEventAsync(object component, EventHandlerInvoker invoker, UIEventArgs eventArgs)
+        public static Task DispatchEventAsync(object component, EventCallback callback, object arg)
         {
             if (component == null)
             {
@@ -175,10 +175,10 @@ namespace Microsoft.AspNetCore.Components
 
             if (component is IHandleAfterEvent handler)
             {
-                return handler.HandleEventAsync(invoker, eventArgs);
+                return handler.HandleEventAsync(callback, arg);
             }
 
-            return invoker.Invoke(eventArgs);
+            return callback.InvokeAsync(arg);
         }
 
         void IComponent.Configure(RenderHandle renderHandle)
@@ -279,9 +279,9 @@ namespace Microsoft.AspNetCore.Components
             StateHasChanged();
         }
 
-        Task IHandleAfterEvent.HandleEventAsync(EventHandlerInvoker invoker, UIEventArgs eventArgs)
+        Task IHandleAfterEvent.HandleEventAsync(EventCallback callback, object arg)
         {
-            var task = invoker.Invoke(eventArgs);
+            var task = callback.InvokeAsync(arg);
             var shouldAwaitTask = task.Status != TaskStatus.RanToCompletion &&
                 task.Status != TaskStatus.Canceled;
 
